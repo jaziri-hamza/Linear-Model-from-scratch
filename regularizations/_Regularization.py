@@ -7,16 +7,20 @@ class Regularization():
         self.setDerCostFunc( der_cost_func, der_regularization_func )
 
     def setCostFunc(self, loss_func, regularization_func):
-        self._costFunc = loss_func + regularization_func
+        self._costFunc = lambda W,X,Y: loss_func(W,X,Y) + regularization_func(W)
 
     def setDerCostFunc(self, der_cost_func, der_regularization_func):
-        self._derCostFunc = der_cost_func + der_regularization_func
+        self._derCostFunc = lambda W,X,Y: der_cost_func(W,X,Y) + der_regularization_func(W)
 
-    def calcDerCostFunc(self, W, X, Y):
-        return self._derCostFunc(W,X,Y)
+    def getDerCostFunc(self):
+        """
+            return a lambda function
+        """
+        return self._derCostFunc
 
-    def calcCostFunc(self, W, X, Y):
+    def getCostFunc(self):
         """
+            return a lambda functio
         """
-        return self._costFunc(W, X, Y)
+        return self._costFunc
     

@@ -28,7 +28,7 @@ class LinearRegression():
         >>> lin_reg = LinearRegression(X, Y, intercept=True)
         >>> lin_reg.fit()
     """
-    def __init__(self, X, Y, intercept=False, regularization='', optimizer=''):
+    def __init__(self, X, Y, intercept=False, regularization=None, optimizer=''):
         self._intercept = intercept
         if(intercept):
             self._X = np.append(X, np.ones((X.shape[0], 1)), axis=1)
@@ -39,36 +39,25 @@ class LinearRegression():
         self.n_features = self._X.shape[1]
         self._W = np.zeros((self.n_features, 1))
         self._costs = []
+        self._init_func(regularization)
         
 
-    def fit(self, learning_rate=0.001, iter=100, regularization=None, alpha=0, beta=0, optimizer='gd'):
+    def fit(self, learning_rate=0.001, iter=100):
         """
             it's the method where we will fit the data
             Parameters:
                 learning_rate: float
-                regularization: string, 'L1'|'L2'|'EL'
-                    'L1': Lasso Regression
-                    'L2': Ridge Regression
-                    'EL': Elastic Net Regression
-                alpha, beta: float, the parameters of regularization
-                    both arguments used just only when we have a regularization method
-                    beta argument just used in case u shoose the 'EL' regularization
                 optimizer: string, is the optimizer algorithm
                     'gd': gradient descent
                     'momunto': momunto optimizer
                     'rms': Rootmeansquare optimizer
                     'adam': Adam optimizer
         """
-        if regularization:
-            self._alpha = alpha
-            self._beta = beta
-        loss = self.__lossFunction(regularization=regularization)
-        lossDerivative = self.__lossFunctionDerivative(regularization=regularization)
         # batch gradient
         for iter in range(iter):
-            dW = lossDerivative(self._W, self._X, self._Y)
+            dW = self._der_cost_func(self._W, self._X, self._Y)
             self._W = self.AdamOptimizer(dW, 0.8, 0.8, iter, learning_rate)
-            self._costs.append(loss(self._W, self._X, self._Y))
+            self._costs.append(self._cost_func(self._W, self._X, self._Y))
 
     def predict(self, X_test):
         """
@@ -80,38 +69,18 @@ class LinearRegression():
             X_test = np.append(X_test, np.ones((X_test.shape[0], 1)), axis=1)
         return np.dot(X_test, self._W)
 
-   
+    def _init_func(self, regularization):
+        self._cost_func = lambda W, X, Y: ( (np.sum( np.square( np.dot(X,W) - Y ) )) ) / 2 * X.shape[0]
+        self._der_cost_func = lambda W, X, Y: np.dot( X.T, ( np.dot(X,W) - Y ) )
+        if(regularization):
+            regularization._init_reg(
+                self._cost_func,
+                self._der_cost_func
+            )
+            self._cost_func = regularization.getCostFunc()
+            self._der_cost_func = regularization.getDerCostFunc()
 
-    def __lossFunction(self, regularization=None):
-        """
-            return function to calcul the loss function,
-            for every regularization parameter type
-            we use the <MeanSquareError> function
-        """
-        error = lambda W, X, Y: ( (np.sum( np.square( np.dot(X,W) - Y ) )) ) / 2 * X.shape[0]
-        if regularization == 'L1' :
-            return lambda W, X, Y: error(W,X,Y) + + (self._alpha * np.sum( np.abs(X) ))
-        elif regularization == 'L2':
-            return lambda W, X, Y: error(W,X,Y) + (self._alpha * np.sum( np.square(X) ))
-        elif regularization == 'EL':
-            return lambda W, X, Y: error(W,X,Y) + self._alpha * (  (1-self._beta / 2) * np.sum( np.square(W) ) + (self._beta * np.sum( np.abs(W) )) )
-        else:
-            return error
 
-    def __lossFunctionDerivative(self, regularization=None):
-        """
-            return the derivative of loss function <MeanSquareError> ,
-            for every regularzation parameter type
-        """
-        derivativeError = lambda W, X, Y: np.dot( X.T, ( np.dot(X,W) - Y ) )
-        if regularization == 'L1':
-            return lambda W,X,Y: derivativeError(W,X,Y) + ( self._alpha * np.sign(W) )
-        elif regularization == 'L2':
-            return lambda W,X,Y: derivativeError(W,X,Y) + (2 * self._alpha * W)
-        elif regularization == 'EL':
-            return lambda W, X, Y: derivativeError(W,X,Y) + self._alpha * ( (self._beta * np.sign(W)) + (2 * self._beta * W) )
-        else:
-            return derivativeError
 
     def gradientDescentOptimizer(self, dW, learning_rate):
         return self._W - learning_rate * dW
