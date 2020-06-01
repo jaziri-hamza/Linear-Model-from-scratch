@@ -1,3 +1,5 @@
+import numpy as np
+
 class Optimizer:
     """
         Optimizer is the base class of any optimizer algorithm
@@ -11,31 +13,23 @@ class Optimizer:
         
     """
 
+    # small number we need it for some operation mathematique
     epsilon = 10**-10
 
 
-    def __init__(self, learning_rate=0.001):
-        self.learning_rate = learning_rate
+    def __init__(self):
+        pass
 
-    def optimize(self):
+    def optimize(self, W, dW, *argv):
         """
             the callable method at each iteration
             to update the new weights
-        """
-        pass
-
-    def setDerivativeFunction(self, der_function):
-        """
-            set the derivative function of cost function
-            to calcul the derivative of weights
             ...
 
-            Attribut:
+            Attributs
             ---------
-            der_function: lambda function
+            dW: np.darray
+                is a matrix contains the derivative of weights
         """
-        self._der = der_function
-
-    
-
-    
+        # call the function where tell us how to update the weight
+        return self.optimize_func(W, dW, *argv)

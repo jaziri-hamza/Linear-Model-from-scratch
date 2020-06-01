@@ -1,4 +1,5 @@
 import numpy as np
+from mylib.optimizers import GradientDescentOptimizer
 
 class LinearRegression():
     """
@@ -28,7 +29,7 @@ class LinearRegression():
         >>> lin_reg = LinearRegression(X, Y, intercept=True)
         >>> lin_reg.fit()
     """
-    def __init__(self, X, Y, intercept=False, regularization=None, optimizer=''):
+    def __init__(self, X, Y, intercept=False, regularization=None, optimizer=None):
         self._intercept = intercept
         if(intercept):
             self._X = np.append(X, np.ones((X.shape[0], 1)), axis=1)
@@ -40,6 +41,11 @@ class LinearRegression():
         self._W = np.zeros((self.n_features, 1))
         self._costs = []
         self._init_func(regularization)
+        if(optimizer):
+            self._optimizer = optimizer
+        else:
+            # default optimizer
+            self._optimizer = GradientDescentOptimizer(0.01)
         
 
     def fit(self, learning_rate=0.001, iter=100):
@@ -56,7 +62,8 @@ class LinearRegression():
         # batch gradient
         for iter in range(iter):
             dW = self._der_cost_func(self._W, self._X, self._Y)
-            self._W = self.AdamOptimizer(dW, 0.8, 0.8, iter, learning_rate)
+            self._W = self._optimizer.optimize(self._W, dW, iter)
+            # self._W = self.AdamOptimizer(dW, 0.8, 0.8, iter, learning_rate)
             self._costs.append(self._cost_func(self._W, self._X, self._Y))
 
     def predict(self, X_test):
@@ -79,39 +86,3 @@ class LinearRegression():
             )
             self._cost_func = regularization.getCostFunc()
             self._der_cost_func = regularization.getDerCostFunc()
-
-
-
-    def gradientDescentOptimizer(self, dW, learning_rate):
-        return self._W - learning_rate * dW
-
-    def momuntoOptimizer(self, dW, beta, learning_rate):
-        if(not hasattr(self, '_vdW')):
-            self._vdW = np.zeros(dW.shape)
-        self._vdW =  beta * self._vdW + (1 - beta) * dW
-        return self._W - learning_rate * self._vdW
-
-    def RMSPropOptimizer(self, dW, beta, learning_rate):
-        """
-            RootMeanSquareProp optimizer
-        """
-        epsilon = 0.00000001
-        if( not hasattr(self, '_vdw')):
-            self._vdW = np.zeros(dW.shape)
-        self._vdW = beta * self._vdW + ((1- beta) * np.square(dW))
-        return self._W - learning_rate * (dW/np.sqrt(self._vdW + epsilon ))
-
-    
-    def AdamOptimizer(self, dW, beta1, beta2, iter, learning_rate):
-        """
-            
-        """
-        epsilon = 0.00000001
-        if(not hasattr(self, '_mvdw')):
-            self._mvdw = np.zeros(self._W.shape)
-            self._svdw = np.zeros(self._W.shape)
-        self._mvdw = beta1 * self._mvdw + (1 - beta1) * dW
-        self._svdw = beta2 * self._svdw + (1 - beta2) * np.square(dW)
-        mvdwC = self._mvdw / ((1 - beta1**iter ) + epsilon)
-        svdwC = self._svdw / ((1 - beta2**iter) + epsilon)
-        return self._W - learning_rate * ( mvdwC / np.sqrt(svdwC + epsilon) )
