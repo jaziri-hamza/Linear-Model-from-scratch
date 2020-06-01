@@ -13,10 +13,9 @@ class AdamOptimizer(Optimizer):
         if( not self, hasattr(self, '_ldW')):
             self._ldW1 = self._ldW2 = np.zeros(W.shape)
         iter = int(argv[0])
-        print(iter)
         self._ldW1 = self.alpha * self._ldW1 + (1 - self.alpha) * dW
         self._ldW2 = self.beta * self._ldW2 + (1 - self.beta) * np.square(dW)
-        curerntldW1 = self._ldW1 / ((1 - self.alpha**iter ) + self.epsilon)
-        curerntldW2 = self._ldW2 / ((1 - self.beta**iter) + self.epsilon)
+        curerntldW1 = self._ldW1 # / ( (1 - self.alpha**iter + self.epsilon ) )
+        curerntldW2 = self._ldW2 # / ((1 - self.beta**iter) + self.epsilon )
         return W - self.learning_rate * ( curerntldW1 / np.sqrt(curerntldW2 + self.epsilon) )
     
