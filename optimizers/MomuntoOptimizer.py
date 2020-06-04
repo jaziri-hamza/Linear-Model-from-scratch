@@ -12,5 +12,5 @@ class MomuntoOptimizer(Optimizer):
         if( not self, hasattr(self, '_ldW')):
             self._ldW = np.zeros(W.shape)
         self._ldW = self.alpha * self._ldW + (1 - self.alpha) * dW
-        return  W - learning_rate * self._ldW
+        return  W - self.learning_rate * self._ldW
     

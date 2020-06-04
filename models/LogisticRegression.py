@@ -45,8 +45,13 @@ class LogisticRegression:
         return Y_updated, len(unique_target)
 
     def _transform_back_target(self, Y):
+        """
+            transform predected labels structure like the first one
+            simply is the reverse of transform_target
+        """
         if( self._target_count < 2 ):
-            return Y
+            Y_new = Y > .5
+            return Y_new.astype(int)
         else:
             Y_new = np.zeros((Y.shape[0], 1))
             for i in range(Y.shape[0]):
@@ -69,17 +74,6 @@ class LogisticRegression:
                 A[:,i] = 0
         return A
     
-    def _row_decoder(self, array):
-        """
-            the deccoder foreach row in target label
-            example,
-            simply is the inverse of encoder function
-            that's mean return back the structure row of predicted target
-            like the first one
-        """
-        for i in range(len(array)):
-            if(i == 1):
-                return i
 
     def fit(self, learning_rate=0.00001, iter=100, optimizer=None, regularization=None, history=False):
             """
@@ -147,7 +141,7 @@ class LogisticRegression:
             ...
         """
         # default cost function
-        self._cost_func = lambda W,X,Y : np.sum( (Y * np.log( sigmoid( np.dot(X,W) ) ) ) + ( (1-Y) * np.log( 1 - sigmoid( np.dot(X,W) )) ) )
+        self._cost_func = lambda W,X,Y : np.sum( np.square( (Y * np.log( sigmoid( np.dot(X,W) ) ) ) + ( (1-Y) * np.log( 1 - sigmoid( np.dot(X,W) )) ) ) )
         self._der_cost_func = lambda W, X, Y: np.dot( X.T, ( sigmoid(np.dot(X,W)) - Y ) )
         if(regularization):
             regularization._init_reg(
