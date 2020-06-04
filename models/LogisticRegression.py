@@ -63,8 +63,8 @@ class LogisticRegression:
             the encoder foreach row in target label
             example
             -------
-            max Number in target label is 7, 
-            give a 2 => return [ 0 0 1 0 0 0 0 ]
+            max Number in target label is 7 as 'length', 
+            give a 2 as 'nbr' => return [ 0 0 1 0 0 0 0 ]
         """
         A = np.zeros((1, length))
         for i in range(length):
