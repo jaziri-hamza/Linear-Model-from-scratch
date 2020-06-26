@@ -1,5 +1,12 @@
 import numpy as np
 
+"""
+    is a class used to normalize the range of independent variables or features of data
+    ...
+    Attributs:
+        X : numpy.ndarray
+            the data went to normalize
+"""
 class MeanNormalization:
     def __init__(self, X):
         if( not isinstance(X, np.ndarray)):

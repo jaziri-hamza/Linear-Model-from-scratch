@@ -1,1 +1,4 @@
 from mylib.metrics.accuracy import accuracy
+from mylib.metrics.confusionBinaryMatrix import ConfusionBinaryMatrix
+from mylib.metrics.confusionMatrix import ConfusionMatrix
+from mylib.metrics.meanAbsoluteError import MeanAbsoluteError
